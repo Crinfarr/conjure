@@ -147,7 +147,7 @@ public class PrinterWrapper {
         printText("Status:\n"+getStatus(), 24, 1);
         feed(true);
     }
-    private void feed(Boolean isFinal) {
+    public void feed(Boolean isFinal) {
         try {
             printerService.printerPerformPrint((isFinal)?120:0, defaultCallback);
         } catch (RemoteException e) {
