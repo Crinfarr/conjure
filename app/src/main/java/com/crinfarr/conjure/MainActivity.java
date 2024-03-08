@@ -1,23 +1,30 @@
 package com.crinfarr.conjure;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.crinfarr.conjure.helpers.CardFactory;
 import com.iposprinter.iposprinterservice.*;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 
 public class MainActivity extends AppCompatActivity {
     private static final String logTag = "PrinterTest";
     protected PrinterWrapper printer;
     protected Button printButton;
+    protected Button showButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
         //!Declaration Block
         //!
         printButton = findViewById(R.id.printbutton);
+        showButton = findViewById(R.id.showButton);
         //!
         //!End Declaration Block
         //!
@@ -51,11 +59,12 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
 
         printButton.setOnClickListener(v -> {
-            try {
-                printer.testPrint();
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
-            }
+            printer.printImage(new CardFactory(this, "Progenitus", "wwuubbrrgg").cardBitmap, 16, 1);
+            printer.feed(true);
+        });
+        showButton.setOnClickListener(v -> {
+            ImageView imgView = findViewById(R.id.preview);
+            imgView.setImageBitmap(new CardFactory(this, "Progenitus", "wwuubbrrgg").cardBitmap);
         });
     }
 
