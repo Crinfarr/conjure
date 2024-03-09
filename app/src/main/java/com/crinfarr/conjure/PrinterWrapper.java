@@ -12,6 +12,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.crinfarr.conjure.helpers.BitmapHelpers;
+import com.crinfarr.conjure.helpers.CardFactory;
 import com.iposprinter.iposprinterservice.IPosPrinterCallback;
 import com.iposprinter.iposprinterservice.IPosPrinterService;
 
@@ -129,22 +130,6 @@ public class PrinterWrapper {
         }
     }
     public void testPrint() throws RemoteException{
-        for (int i = 1; i <= 10; i++) {
-            printerService.setPrinterPrintDepth(i, defaultCallback);
-            printText("Print depth "+i, 24, 1);
-            feed(false);
-        }
-        printerService.setPrinterPrintDepth(6, defaultCallback);
-        feed(false);
-        for (String key: new String[]{"W", "U", "B", "R", "G"}) {
-            printImage(Objects.requireNonNull(manamap.get(key)), 3, 1);
-        }
-        feed(false);
-        for (int fontsize: new int[]{16, 24, 32, 48}) {
-            printText(fontsize+"px", fontsize, 1);
-            feed(false);
-        }
-        printText("Status:\n"+getStatus(), 24, 1);
         feed(true);
     }
     public void feed(Boolean isFinal) {
