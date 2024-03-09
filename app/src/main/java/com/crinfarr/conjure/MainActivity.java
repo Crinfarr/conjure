@@ -57,14 +57,33 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
+//        Bitmap card = new CardFactory(
+//                this,
+//                "Progenitus",
+//                "wwuubbrrgg",
+//                "Legendary Creature - Hydra Avatar",
+//                "Protection from everything\n"+
+//                        "\n"+
+//                        "If Progenitus would be put into a graveyard from anywhere, reveal Progenitus and shuffle it into its owner’s library instead.",
+//                new String[]{"10", "10"}
+//        ).cardBitmap;
+        Bitmap card = new CardFactory(
+                this,
+                "Anzrag, the Quake-Mole",
+                "2rg",
+                "Legendary Creature - Mole God",
+                "Whenever Anzrag, the Quake-Mole becomes blocked, untap each creature you control. After this phase, there is an additional combat phase.\n" +
+                        "\n" +
+                        "{3}{R}{R}{G}{G}: Anzrag must be blocked each combat this turn if able.",
+                new String[]{"8", "4"}
+        ).cardBitmap;
         printButton.setOnClickListener(v -> {
-            printer.printImage(new CardFactory(this, "Progenitus", "wwuubbrrgg").cardBitmap, 16, 1);
+            printer.printImage(card, 16, 0);
             printer.feed(true);
         });
         showButton.setOnClickListener(v -> {
             ImageView imgView = findViewById(R.id.preview);
-            imgView.setImageBitmap(new CardFactory(this, "Progenitus", "wwuubbrrgg").cardBitmap);
+            imgView.setImageBitmap(card);
         });
     }
 
