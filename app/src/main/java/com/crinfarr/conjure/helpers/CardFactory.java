@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.PatternMatcher;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -56,17 +57,34 @@ public class CardFactory {
             defaultPaint.setTextAlign(Paint.Align.LEFT);
             defaultPaint.setLetterSpacing(0.05f);
         }
+        TextPaint oraclePaint = new TextPaint() {{
+            setTextSize(charSize);
+            setLetterSpacing(0.05f);
+            setTypeface(ResourcesCompat.getFont(parent.getBaseContext(), R.font.belerenbold));
+        }};
         //
         //END DECLARES
         //
 
         //Mana cost
-        Bitmap manacostBitmap = manaCost(mana);
+        StaticLayout mvLayout = StaticLayout.Builder.obtain(
+                oracleBuilder(mana),
+                0,
+                mana.length(),
+                oraclePaint,
+                (int) Math.ceil(oraclePaint.measureText(mana))
+        ).build();
+        Bitmap mvBitmap = Bitmap.createBitmap(mvLayout.getWidth(), mvLayout.getHeight()+padding, Bitmap.Config.ARGB_8888);
+        Canvas mvCanvas = new Canvas(mvBitmap) {{
+            drawARGB(0xff, 0xff, 0xff, 0xff);
+        }};
+        mvLayout.draw(mvCanvas);
 
         //Name
-        while (defaultPaint.measureText(name) + manacostBitmap.getWidth() + padding > 388)
+        while (defaultPaint.measureText(name) + mvBitmap.getWidth() + padding > 388)
             defaultPaint.setTextScaleX(defaultPaint.getTextScaleX()-0.01f);
         Bitmap titlebarBitmap = Bitmap.createBitmap((int) defaultPaint.measureText(name), charSize +padding, Bitmap.Config.ARGB_8888);
+
         Canvas titlebarCanvas = new Canvas(titlebarBitmap) {{
             drawARGB(0xff, 0xff, 0xff, 0xff);
         }};
@@ -84,11 +102,7 @@ public class CardFactory {
 
         //Oracle text
         oracletext = oracletext.replaceAll("(\\{(?=\\d))|((?<=\\d)\\})", "");
-        StaticLayout oracleLayout = StaticLayout.Builder.obtain(oracleBuilder(oracletext), 0, oracletext.length(), new TextPaint() {{
-            setTextSize(charSize);
-            setLetterSpacing(0.05f);
-            setTypeface(ResourcesCompat.getFont(parent.getBaseContext(), R.font.belerenbold));
-        }}, 388).build();
+        StaticLayout oracleLayout = StaticLayout.Builder.obtain(oracleBuilder(oracletext), 0, oracletext.length(), oraclePaint, 388).build();
         Bitmap oracleBitmap = Bitmap.createBitmap(oracleLayout.getWidth(), oracleLayout.getHeight() + padding, Bitmap.Config.ARGB_8888);
         Canvas oracleCanvas = new Canvas(oracleBitmap) {{
             drawARGB(0xff, 0xff, 0xff, 0xff);
@@ -136,7 +150,7 @@ public class CardFactory {
 
             //header
             drawBitmap(titlebarBitmap, 0, 0, defaultPaint);
-            drawBitmap(manacostBitmap, 388-manacostBitmap.getWidth(), 0, defaultPaint);
+            drawBitmap(mvBitmap, 388-mvBitmap.getWidth(), 0, defaultPaint);
 
             //type bar
             drawBitmap(typelineBitmap, 0, titlebarBitmap.getHeight(), defaultPaint);
@@ -174,45 +188,6 @@ public class CardFactory {
                     }}
             );
         }};
-    }
-    public Bitmap manaCost(String manacost){
-        Stack<String> manaSymbols = new Stack<>();
-        float strWidth = 0;
-        Matcher manamatcher = Pattern.compile("(^\\d+)|([wubrgWUBRG](\\/[wubrgWUBRGpPsS])?)").matcher(manacost);
-        while (manamatcher.find())
-            manaSymbols.push(manamatcher.group());
-        for (String symbol : manaSymbols) {
-            if (Pattern.compile("\\d").matcher(symbol).matches()) {
-                strWidth += defaultPaint.measureText(symbol);
-            } else {
-                strWidth += charSize;
-            }
-        }
-        Bitmap costmap = Bitmap.createBitmap((int) strWidth, 48, Bitmap.Config.ARGB_8888);
-        Canvas costCanvas = new Canvas(costmap){{
-            drawARGB(0xff, 0xff, 0xff, 0xff);
-        }};
-        float LOffset = 0;
-        for (String symbol : manaSymbols) {
-            if (Pattern.compile("\\d").matcher(symbol).matches()) {
-                costCanvas.drawText(symbol, LOffset, -defaultPaint.ascent()-0.5f, defaultPaint);
-                LOffset += defaultPaint.measureText(symbol);
-            } else {
-                if (symMap.get(symbol.toLowerCase()) == null) {
-                    throw new NotImplementedError("Invalid symbol");
-                }
-                costCanvas.drawBitmap(
-                        Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                                parent.getResources(),
-                                symMap.get(symbol.toLowerCase())
-                        ), charSize, charSize, true),
-                        LOffset,
-                        1.5f,
-                        defaultPaint);
-                LOffset += charSize;
-            }
-        }
-        return costmap;
     }
     public Spanned oracleBuilder(String oracletext) {
         SpannableString output = new SpannableString(oracletext);
